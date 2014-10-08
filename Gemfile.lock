@@ -51,4 +51,5 @@ PLATFORMS
 
 DEPENDENCIES
   growl
+  guard
   guard-rspec
