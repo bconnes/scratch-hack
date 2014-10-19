@@ -1,37 +1,64 @@
 require_relative '../tile.rb'
 
-class Door < Tile
+class DoorTile < Tile
   attr_reader :open, :closed, :broken
-  def initialize(params)
+  def initialize(params = {})
     @status = params[:status]
     @open = params[:open]
     @closed = params[:closed]
     @broken = params[:broken]
+    @base = params[:base]
   end
 
   def draw(x, y, z)
+    if @base
+      @base.draw(x, y, z)
+    end
     case
       when @status === :open
-        @open.draw(x, y, z)
+        @open.draw(x, y, z + 1)
       when @status === :closed
-        @closed.draw(x, y, z)
+        @closed.draw(x, y, z + 1)
       when @status === :broken
-        @broken.draw(x, y, z)
+        @broken.draw(x, y, z + 1)
       else
-        @open.draw
+        @open.draw(x, y, z + 1)
     end
   end
 
   def open
-    @status = :open
+    if @status != :broken
+      if @status == :open
+        $window.log('This door is already open!')
+      else
+        @status = :open
+        $window.log('Door Opened!')
+      end
+    else
+      $window.log("Can't open a broken door!")
+    end
   end
 
   def close
-    @status = :closed
+    if @status != :broken
+      if @status == :closed
+        $window.log('This door is already closed!')
+      else
+        @status = :closed
+        $window.log('Door Closed!')
+      end
+    else
+      $window.log("Can't open a closed door!")
+    end
   end
 
   def break
-    @status = :broken
+    if @status == :broken
+      $window.log("This door is already broken!")
+    else
+      @status = :broken
+      $window.log("You broke the door!")
+    end
   end
 
   def walkable

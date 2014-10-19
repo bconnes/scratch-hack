@@ -1,9 +1,10 @@
+require_relative './item.rb'
+
 class Level
-  def initialize(params)
+  def initialize(params = {})
     #put info the level maker needs into params
-    @window = params[:window]
     @floor = params[:floor] || 1
-    @tilesheet = params[:tilesheet] || TileSheet.default_tilesheet(window: @window)
+    @tilesheet = params[:tilesheet] || TileSheet.default_tilesheet()
     @tiles = build_level
     @size_x = params[:size_x]
     @size_y = params[:size_y]
@@ -11,16 +12,25 @@ class Level
 
   def build_level
     grid = []
-    grid << Array.new(40) {|index| @tilesheet.wall}
-    array = Array.new(38) {|index| @tilesheet.floor}
-    array << @tilesheet.wall
-    array.unshift(@tilesheet.wall)
-
-    38.times do
-      grid << Array.new(array)
+    grid[0] = []
+    40.times do
+      grid[0] << @tilesheet.wall
     end
-    grid << Array.new(40) {|index| @tilesheet.wall}
+    38.times do
+      array = []
+      array << @tilesheet.wall
+      38.times do
+        array << @tilesheet.floor
+      end
+      array << @tilesheet.wall
+      grid << array
+    end
+    grid << []
+    40.times do
+      grid[grid.length - 1] << @tilesheet.wall
+    end
     grid[5][5] = @tilesheet.door
+    grid[6][7].add_item(@tilesheet.sword)
     return grid
   end
 
@@ -34,6 +44,14 @@ class Level
       end
       starting_y += 16
     end
+  end
+
+  def display_items_at(x, y)
+    @tiles[y][x].display_items
+  end
+
+  def pick_up_item_at(x, y, index)
+    @tiles[y][x].take_item(index)
   end
 
   def walkable?(destination_x, destination_y)

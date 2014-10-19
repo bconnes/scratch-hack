@@ -1,11 +1,10 @@
 class TileSheet
-  def initialize(params)
-    @window = params[:window]
+  def initialize(params = {})
   end
 
-  def self.default_tilesheet(params)
+  def self.default_tilesheet(params = {})
     require_relative './tilesheets/default.rb'
-    return DefaultTileSheet.new(window: params[:window])
+    return DefaultTileSheet.new(params)
   end
 
   def tiles

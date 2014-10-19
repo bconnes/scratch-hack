@@ -1,20 +1,24 @@
 require_relative './tile.rb'
 
 class Actor
-  attr_accessor :x, :y
+  attr_accessor :x, :y, :items
 
-  def initialize(params)
-    @window = params[:window]
+  def initialize(params = {})
     @level = params[:level]
-    @tilesheet = params[:tilesheet] || Gosu::Image.load_tiles(@window, '../media/Characters/Player1.png', 16, 16, true)
+    @tilesheet = params[:tilesheet] || Gosu::Image.load_tiles($window, '../media/Characters/Player1.png', 16, 16, true)
     @tile = params[:tile_index] || 0
     @character = Tile.new(image: @tilesheet[@tile])
     @x = params[:x] || 1
     @y = params[:y] || 1
+    @items = params[:items] || []
   end
 
-  def draw
-    @character.draw(@x * 16, @y * 16, 0)
+  def draw(z = 0)
+    @character.draw(@x * 16, @y * 16, z)
+  end
+
+  def get_item(item)
+    @items << item
   end
 
   def move(direction)
