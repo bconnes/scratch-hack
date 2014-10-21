@@ -6,7 +6,7 @@ class Level
     #put info the level maker needs into params
     @floor = params[:floor] || 1
     @tilesheet = params[:tilesheet] || TileSheet.default_tilesheet()
-    @actors = []
+    @actors = [$player]
     @tiles = build_level
     @size_x = params[:size_x]
     @size_y = params[:size_y]
@@ -38,8 +38,8 @@ class Level
       grid[grid.length - 1] << @tilesheet.wall
     end
     grid[5][5] = @tilesheet.door
-    grid[6][7].add_item(@tilesheet.sword)
-    grid[6][7].add_item(@tilesheet.shield)
+    grid[6][7].add_item(Item.sword_of_testing)
+    grid[6][7].add_item(Item.sheild_of_testing)
     @actors << TestBotActor.new(x: 10, y: 10, level: self)
     return grid
   end
@@ -55,7 +55,7 @@ class Level
       starting_y += 16
     end
     @actors.each do |actor|
-      actor.draw
+      actor.draw(z=2)
     end
   end
 
@@ -72,22 +72,49 @@ class Level
   end
 
   def walkable?(destination_x, destination_y)
-    @tiles[destination_x][destination_y].walkable
+    items_to_check = Array.new(@actors)
+    items_to_check.keep_if {|actor| actor.x == destination_x and actor.y == destination_y}
+    items_to_check << @tiles[destination_x][destination_y]
+    items_to_check.all? {|item| item.walkable}
   end
 
-  def left_of(x, y)
-    @tiles[x - 1][y]
+  def left(x, y)
+    actor = Array.new(@actors)
+    actor.keep_if { |actor| actor.x == x - 1 and actor.y == y}
+    if actor.empty?
+      @tiles[x - 1][y]
+    else
+      actor[0]
+    end
   end
 
-  def right_of(x, y)
-    @tiles[x + 1][y]
+  def right(x, y)
+    actor = Array.new(@actors)
+    actor.keep_if { |actor| actor.x == x + 1 and actor.y == y}
+    if actor.empty?
+      @tiles[x + 1][y]
+    else
+      actor[0]
+    end
   end
 
-  def above(x, y)
-    @tiles[x][y - 1]
+  def up(x, y)
+    actor = Array.new(@actors)
+    actor.keep_if { |actor| actor.x == x and actor.y == y - 1}
+    if actor.empty?
+      @tiles[x][y - 1]
+    else
+      actor[0]
+    end
   end
 
-  def below(x, y)
-    @tiles[x][y + 1]
+  def down(x, y)
+    actor = Array.new(@actors)
+    actor.keep_if { |actor| actor.x == x and actor.y == y + 1}
+    if actor.empty?
+      @tiles[x][y + 1]
+    else
+      actor[0]
+    end
   end
 end

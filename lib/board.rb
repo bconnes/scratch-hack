@@ -7,8 +7,9 @@ class Board
   attr_accessor :player, :level, :turns
   def initialize(params = {})
     @tiles = build_board
+    $player = Player.new()
     @level = Level.new()
-    $player = Player.new(level: @level)
+    $player.level = @level
     $console = Console.new(stack: ['Console Initiated'], width: 160)
     @panel = Panel.new(width: 160)
     @turns = 0
@@ -27,6 +28,5 @@ class Board
     @level.draw(0,0)
     $console.draw(640,0,0)
     @panel.draw(800, 0, 0)
-    $player.draw(2)
   end
 end

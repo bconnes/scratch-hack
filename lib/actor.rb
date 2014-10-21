@@ -1,23 +1,38 @@
 require_relative './tile.rb'
 
 class Actor
-  attr_accessor :x, :y, :items, :walkable
+  attr_accessor :x, :y, :items, :walkable, :level, :wielded_item
 
   def initialize(params = {})
     @level = params[:level]
     @tile = params[:tile_index] || 0
-    @tilesheet = TileSheet.default_tilesheet
-    @character = params[:character] || @tilesheet.player
+    @tile_sheet ||= Gosu::Image.load_tiles($window, '../media/Characters/Player1.png', 16, 16, true)
+    @character = params[:character] || @tile_sheet[0]
     @x = params[:x] || 1
     @y = params[:y] || 1
-    @items = params[:items] || []
+    @inventory = params[:items] || []
     @health = params[:health] || 10
     @max_health = params[:max_health] || @health
     @walkable = params[:walkable]
+    @walkable ||= false
+    @base_attack = params[:base_attack] || 1
+    @wielded_item = nil
   end
 
   def draw(z = 0)
     @character.draw(@x * 16, @y * 16, z)
+  end
+
+  def attack(direction)
+
+  end
+
+  def damage
+    if @wielded_item
+      @base_attack + @wielded_item.damage
+    else
+      @base_attack
+    end
   end
 
   def take_hit(min, max, message = "")
@@ -27,25 +42,37 @@ class Actor
     $window.log("You took #{damage} damage.")
   end
 
+  def wield(id)
+    @wielded_item = @inventory.delete_at(id)
+  end
+
+  def unweild(id)
+    @inventory << @wielded_item
+    @wielded_item = nil
+  end
+
   def get_item(item)
-    @items << item
+    @inventory << item
   end
 
   def rest
     1.in(10) do
-      $window.log('Resting has made you feel slightly better.')
       @health = [@health + 1, @max_health].min
     end
   end
 
   def display_items
-    @items.each_with_index do |item, index|
+    @inventory.each_with_index do |item, index|
       $window.log("#{index}: #{item.name}")
     end
   end
 
+  def items
+    (@inventory + [@wielded_item]).compact
+  end
+
   def drop(index)
-    @level.add_item_at(@x, @y, @items.delete_at(index))
+    @level.add_item_at(@x, @y, @inventory.delete_at(index))
   end
 
   def move(direction)

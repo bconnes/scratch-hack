@@ -11,8 +11,39 @@ class Player < Actor
   end
 
   def get_item(item)
-    @items << item
+    @inventory << item
     $window.log("Got #{item.name}")
+  end
+
+  def rest
+    1.in(10) do
+      $window.log('Resting has made you feel slightly better.')
+      @health = [@health + 1, @max_health].min
+    end
+  end
+
+  def break(direction)
+    @level.send(direction, @x, @y).break
+    $window.tick()
+  end
+
+  def close(direction)
+    @level.send(direction, @x, @y).close
+    $window.tick()
+  end
+
+  def open(direction)
+    @level.send(direction, @x, @y).open
+    $window.tick()
+  end
+
+  def attack(direction)
+    @level.send(direction, @x, @y).take_hit(damage, damage)
+    $window.tick()
+  end
+
+  def tick
+    nil
   end
 
   def move(direction)

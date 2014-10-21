@@ -30,7 +30,7 @@ class Tile
     end
   end
 
-  def method_missing(method)
+  def method_missing(method, *args)
     case
       when method === :close
         $window.log('This can not be closed!')
