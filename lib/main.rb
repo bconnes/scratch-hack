@@ -1,12 +1,14 @@
 require 'gosu'
+require 'probability'
 
 require_relative './tilesheet.rb'
 require_relative './board.rb'
 require_relative './actor.rb'
 
 class GameWindow < Gosu::Window
+  attr_reader :board
   def initialize
-    super(800, 640, false)
+    super(960, 640, false)
     self.caption = 'Hack'
     $window = self
     @board = Board.new()
@@ -20,6 +22,10 @@ class GameWindow < Gosu::Window
 
   def draw
     @board.draw
+  end
+
+  def tick
+    @board.tick
   end
 
   def button_down(id)
@@ -58,76 +64,105 @@ class GameWindow < Gosu::Window
       if id == Gosu::KbP
         @mode = :pick_up
         log('Choose an item to pick up!')
-        @board.current_level.display_items_at($player.x, $player.y)
+        @board.level.display_items_at($player.x, $player.y)
+      end
+
+      if id == Gosu::KbD
+        @mode = :drop
+        log('Choose an item to drop!')
+        $player.display_items
+      end
+
+      if id == Gosu::KbR
+        @mode = :rest
+        temp_log('How many turns would you like to rest? (1 - 10)')
       end
 
     elsif @mode == :open
       if id == Gosu::KbLeft
-        @board.current_level.left_of($player.x, $player.y).open
+        @board.level.left_of($player.x, $player.y).open
         @mode = :player
       end
 
       if id == Gosu::KbRight
-        @board.current_level.right_of($player.x, $player.y).open
+        @board.level.right_of($player.x, $player.y).open
         @mode = :player
       end
 
       if id == Gosu::KbUp
-        @board.current_level.above($player.x, $player.y).open
+        @board.level.above($player.x, $player.y).open
         @mode = :player
       end
 
       if id == Gosu::KbDown
-        @board.current_level.below($player.x, $player.y).open
+        @board.level.below($player.x, $player.y).open
         @mode = :player
       end
 
     elsif @mode == :close
       if id == Gosu::KbLeft
-        @board.current_level.left_of($player.x, $player.y).close
+        @board.level.left_of($player.x, $player.y).close
         @mode = :player
       end
 
       if id == Gosu::KbRight
-        @board.current_level.right_of($player.x, $player.y).close
+        @board.level.right_of($player.x, $player.y).close
         @mode = :player
       end
 
       if id == Gosu::KbUp
-        @board.current_level.above($player.x, $player.y).close
+        @board.level.above($player.x, $player.y).close
         @mode = :player
       end
 
       if id == Gosu::KbDown
-        @board.current_level.below($player.x, $player.y).close
+        @board.level.below($player.x, $player.y).close
         @mode = :player
       end
 
     elsif @mode == :break
       if id == Gosu::KbLeft
-        @board.current_level.left_of($player.x, $player.y).break
+        @board.level.left_of($player.x, $player.y).break
         @mode = :player
       end
 
       if id == Gosu::KbRight
-        @board.current_level.right_of($player.x, $player.y).break
+        @board.level.right_of($player.x, $player.y).break
         @mode = :player
       end
 
       if id == Gosu::KbUp
-        @board.current_level.above($player.x, $player.y).break
+        @board.level.above($player.x, $player.y).break
         @mode = :player
       end
 
       if id == Gosu::KbDown
-        @board.current_level.below($player.x, $player.y).break
+        @board.level.below($player.x, $player.y).break
         @mode = :player
       end
 
     elsif @mode == :pick_up
       number = get_number_from_id(id)
-      item = @board.current_level.pick_up_item_at($player.x, $player.y, number)
-      $player.get_item(item)
+      item = @board.level.pick_up_item_at($player.x, $player.y, number)
+      if item
+        $player.get_item(item)
+      else
+        log('No item with that ID.')
+      end
+      @mode = :player
+
+    elsif @mode == :drop
+      number = get_number_from_id(id)
+      $player.drop(number)
+      @mode = :player
+
+    elsif @mode == :rest
+      number = get_number_from_id(id)
+      number.times do
+        $player.rest
+      end
+      log("Rested #{number} times.")
+      @mode = :player
     end
 
   end
@@ -137,7 +172,7 @@ class GameWindow < Gosu::Window
     if i == 39
       index = 0
     else
-      index = i - 30
+      index = i - 29
     end
     return index
   end

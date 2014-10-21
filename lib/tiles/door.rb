@@ -33,6 +33,7 @@ class DoorTile < Tile
       else
         @status = :open
         $window.log('Door Opened!')
+        $window.tick
       end
     else
       $window.log("Can't open a broken door!")
@@ -46,6 +47,7 @@ class DoorTile < Tile
       else
         @status = :closed
         $window.log('Door Closed!')
+        $window.tick
       end
     else
       $window.log("Can't open a closed door!")
@@ -58,6 +60,7 @@ class DoorTile < Tile
     else
       @status = :broken
       $window.log("You broke the door!")
+      $window.tick
     end
   end
 

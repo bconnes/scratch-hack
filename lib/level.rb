@@ -1,13 +1,21 @@
 require_relative './item.rb'
+require_relative 'actors/test_bot.rb'
 
 class Level
   def initialize(params = {})
     #put info the level maker needs into params
     @floor = params[:floor] || 1
     @tilesheet = params[:tilesheet] || TileSheet.default_tilesheet()
+    @actors = []
     @tiles = build_level
     @size_x = params[:size_x]
     @size_y = params[:size_y]
+  end
+
+  def tick
+    @actors.each do |actor|
+      actor.tick
+    end
   end
 
   def build_level
@@ -31,6 +39,8 @@ class Level
     end
     grid[5][5] = @tilesheet.door
     grid[6][7].add_item(@tilesheet.sword)
+    grid[6][7].add_item(@tilesheet.shield)
+    @actors << TestBotActor.new(x: 10, y: 10, level: self)
     return grid
   end
 
@@ -44,6 +54,9 @@ class Level
       end
       starting_y += 16
     end
+    @actors.each do |actor|
+      actor.draw
+    end
   end
 
   def display_items_at(x, y)
@@ -52,6 +65,10 @@ class Level
 
   def pick_up_item_at(x, y, index)
     @tiles[y][x].take_item(index)
+  end
+
+  def add_item_at(x, y, item)
+    @tiles[y][x].add_item(item)
   end
 
   def walkable?(destination_x, destination_y)
