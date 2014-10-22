@@ -76,7 +76,7 @@ class InputHandler
   def get_integer
     text_input = Gosu::TextInput.new
     def text_input.filter(text_in)
-      text_in.gsub(/\D/, "")
+      text_in.delete("^0-9")
     end
     $window.text_input = text_input
     @waiting_for_text = true
