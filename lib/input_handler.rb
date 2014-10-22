@@ -65,6 +65,7 @@ class InputHandler
         action.setup
         if action.requirement == :integer
           get_integer
+          @waiting_for_text = true
         end
       else
         action.execute
@@ -79,6 +80,5 @@ class InputHandler
       text_in.delete("^0-9")
     end
     $window.text_input = text_input
-    @waiting_for_text = true
   end
 end
